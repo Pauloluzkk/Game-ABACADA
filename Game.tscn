@@ -1,0 +1,168 @@
+[gd_scene format=3 uid="uid://c5y2f86r1y0yp"]
+
+[ext_resource type="Script" uid="uid://cduajekitq2hr" path="res://scripts/game_manager.gd" id="1_sb48q"]
+[ext_resource type="Texture2D" uid="uid://cfb8woy6ad32o" path="res://Gemini_Generated_Image_ws8522ws8522ws85.png" id="1_xkndl"]
+[ext_resource type="Script" uid="uid://8nd506cwocys" path="res://scripts/drop_zone.gd" id="2_u44n3"]
+[ext_resource type="PackedScene" uid="uid://p4db88nuqrys" path="res://syllable.tscn" id="3_u44n3"]
+[ext_resource type="Script" uid="uid://dqd1singxb12n" path="res://scripts/robot_manager.gd" id="5_3mrqo"]
+[ext_resource type="Texture2D" uid="uid://dqp8hauqpb362" path="res://Cabeça robo.png" id="6_joorw"]
+[ext_resource type="Texture2D" uid="uid://j6a1jgdlbnxj" path="res://Pernas Robo.png" id="7_2vekm"]
+[ext_resource type="Texture2D" uid="uid://docd3t3rjbns1" path="res://Corpo Robo.png" id="8_2vekm"]
+[ext_resource type="Texture2D" uid="uid://ct3xl1xuk0wd5" path="res://Braço Robo(1).png" id="9_2vekm"]
+
+[node name="Game" type="Control" unique_id=1789732575]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_sb48q")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=90895879]
+layout_mode = 0
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 1152.0
+offset_bottom = 647.0
+texture = ExtResource("1_xkndl")
+expand_mode = 1
+
+[node name="DropZones" type="Control" parent="." unique_id=1800603322]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="TargetYellow" type="Control" parent="DropZones" unique_id=100980379]
+anchors_preset = 0
+offset_left = 337.0
+offset_top = 482.0
+offset_right = 491.0
+offset_bottom = 640.0
+mouse_filter = 1
+script = ExtResource("2_u44n3")
+
+[node name="TargetGreen" type="Control" parent="DropZones" unique_id=1252751487]
+layout_mode = 1
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 499.0
+offset_top = 481.0
+offset_right = 634.0
+offset_bottom = 614.0
+mouse_filter = 1
+script = ExtResource("2_u44n3")
+zone_index = 1
+
+[node name="TargetPurple" type="Control" parent="DropZones" unique_id=565003435]
+anchors_preset = 0
+offset_left = 666.0
+offset_top = 479.0
+offset_right = 817.0
+offset_bottom = 645.0
+mouse_filter = 1
+script = ExtResource("2_u44n3")
+zone_index = 2
+
+[node name="Syllables" type="Control" parent="." unique_id=724103157]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="Syllable" parent="Syllables" unique_id=368112243 instance=ExtResource("3_u44n3")]
+layout_mode = 0
+offset_left = 261.0
+offset_top = 144.0
+offset_right = 369.0
+offset_bottom = 251.0
+syllable_text = "BO"
+
+[node name="Syllable2" parent="Syllables" unique_id=1588321339 instance=ExtResource("3_u44n3")]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 305.0
+offset_right = 1012.0
+offset_bottom = 412.0
+syllable_text = "NE"
+
+[node name="Syllable3" parent="Syllables" unique_id=2142886873 instance=ExtResource("3_u44n3")]
+layout_mode = 0
+offset_left = 118.0
+offset_top = 288.0
+offset_right = 218.0
+offset_bottom = 388.0
+syllable_text = "CA"
+
+[node name="Syllable4" parent="Syllables" unique_id=159512541 instance=ExtResource("3_u44n3")]
+layout_mode = 0
+offset_left = 121.0
+offset_top = 435.0
+offset_right = 221.0
+offset_bottom = 535.0
+syllable_text = "CA"
+
+[node name="Syllable5" parent="Syllables" unique_id=988902460 instance=ExtResource("3_u44n3")]
+layout_mode = 0
+offset_left = 912.0
+offset_top = 457.0
+offset_right = 1012.0
+offset_bottom = 557.0
+syllable_text = "CA"
+
+[node name="Syllable6" parent="Syllables" unique_id=1372420015 instance=ExtResource("3_u44n3")]
+layout_mode = 0
+offset_left = 778.0
+offset_top = 137.0
+offset_right = 878.0
+offset_bottom = 237.0
+syllable_text = "CA"
+
+[node name="RobotManager" type="Control" parent="." unique_id=1845940358]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("5_3mrqo")
+robot_parts_textures = Array[Texture2D]([ExtResource("6_joorw"), ExtResource("7_2vekm")])
+
+[node name="PartsContainer" type="Control" parent="RobotManager" unique_id=1717109500]
+anchors_preset = 0
+offset_left = 458.0
+offset_top = 112.0
+offset_right = 690.0
+offset_bottom = 235.0
+
+[node name="Perna" type="TextureRect" parent="RobotManager/PartsContainer" unique_id=935035695]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 206.0
+offset_right = 209.0
+offset_bottom = 367.0
+texture = ExtResource("7_2vekm")
+expand_mode = 1
+
+[node name="Corpo" type="TextureRect" parent="RobotManager/PartsContainer" unique_id=1354736963]
+layout_mode = 0
+offset_left = -37.0
+offset_top = 93.0
+offset_right = 250.0
+offset_bottom = 300.0
+texture = ExtResource("8_2vekm")
+expand_mode = 1
+
+[node name="Braço" type="TextureRect" parent="RobotManager/PartsContainer" unique_id=2024144895]
+layout_mode = 0
+offset_left = -48.0
+offset_top = 34.0
+offset_right = 286.0
+offset_bottom = 369.0
+texture = ExtResource("9_2vekm")
+expand_mode = 1
+
+[node name="Cabeça" type="TextureRect" parent="RobotManager/PartsContainer" unique_id=1359323990]
+layout_mode = 0
+offset_left = -11.0
+offset_top = -75.0
+offset_right = 244.0
+offset_bottom = 170.0
+texture = ExtResource("6_joorw")
+expand_mode = 1

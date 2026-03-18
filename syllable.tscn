@@ -1,0 +1,55 @@
+[gd_scene format=3 uid="uid://p4db88nuqrys"]
+
+[ext_resource type="Script" uid="uid://b8hgk5i5vodab" path="res://scripts/draggable.gd" id="1_oghkh"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oghkh"]
+bg_color = Color(0.9372549, 0.62352943, 0.15294118, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+corner_radius_top_left = 30
+corner_radius_top_right = 30
+corner_radius_bottom_right = 30
+corner_radius_bottom_left = 30
+
+[sub_resource type="LabelSettings" id="LabelSettings_uakl2"]
+font_size = 60
+outline_size = 10
+outline_color = Color(0, 0, 0, 1)
+
+[node name="Syllable" type="Control" unique_id=368112243 groups=["draggables"]]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 11.0
+offset_right = 131.0
+offset_bottom = 120.0
+script = ExtResource("1_oghkh")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1194397827]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 5.0
+offset_right = 63.0
+offset_bottom = 44.0
+
+[node name="Panel" type="Panel" parent="." unique_id=979044026]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_oghkh")
+
+[node name="Label" type="Label" parent="." unique_id=1810008565]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "BA"
+label_settings = SubResource("LabelSettings_uakl2")
+horizontal_alignment = 1
+vertical_alignment = 1
