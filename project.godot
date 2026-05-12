@@ -11,13 +11,14 @@ config_version=5
 [application]
 
 config/name="JogoABACADAmerlim"
-run/main_scene="uid://ttaiwdtqtr7h"
+run/main_scene="res://Intro.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
 Global="*uid://cb5mwc407stgs"
+SideMenu="*res://SideMenu.tscn"
 
 [physics]
 

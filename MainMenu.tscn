@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://wg544sk3p20p" path="res://scripts/main_menu.gd" id="1_eiy7p"]
 [ext_resource type="Texture2D" uid="uid://4u0smhorsn48" path="res://Robo Montador.jpg" id="2_h7a2f"]
+[ext_resource type="AudioStream" uid="uid://c8o5q3d4x6m0k" path="res://assets/Clockwork_Critters.mp3" id="3_h7a2f"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wtcfe"]
 
@@ -44,6 +45,10 @@ theme_override_styles/hover_mirrored = SubResource("StyleBoxEmpty_epypp")
 theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_0hol4")
 theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxEmpty_q6r6c")
 theme_override_styles/disabled_mirrored = SubResource("StyleBoxEmpty_kdubu")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." unique_id=1747901376]
+stream = ExtResource("3_h7a2f")
+autoplay = true
 
 [connection signal="ready" from="." to="." method="_on_ready"]
 [connection signal="pressed" from="PlayButton" to="." method="_on_play_button_pressed"]

@@ -33,6 +33,8 @@ var TempoDeJogo_Min: int = 0
 var TempoDeJogo_Sec: int = 0
 var JogoConcluido: bool = false
 var Intro_tocar: bool = true
+var volume: float = 0.0
+var audio_enabled: bool = true
 
 func _ready() -> void:
 	add_child(JsonRequest)
