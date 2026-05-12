@@ -1,6 +1,9 @@
 extends Control
 class_name RobotManager
 
+# Emitido quando o robô está completamente montado e a dança termina
+signal robot_complete
+
 # Lista de texturas (imagens separadas) das partes do robô.
 # O usuário/game designer preenche isso no Godot com arquivos .png
 @export var robot_parts_textures : Array[Texture2D] = []
@@ -43,8 +46,11 @@ func animate_new_part():
 
 func _celebrate_robot_complete():
 	print("Robô completado!! Iniciar dança!!")
-	# Podes botar a animação de Waving aqui ou chamar um método no GameManager
 	var tween = get_tree().create_tween().set_loops(3)
 	tween.tween_property(parts_container, "rotation_degrees", 5.0, 0.2)
 	tween.tween_property(parts_container, "rotation_degrees", -5.0, 0.2)
 	tween.tween_property(parts_container, "rotation_degrees", 0.0, 0.2)
+	# Aguarda a dança terminar (3 loops × 0.6s cada) e só então sinaliza
+	await get_tree().create_timer(3 * 0.6).timeout
+	parts_container.rotation_degrees = 0.0
+	emit_signal("robot_complete")

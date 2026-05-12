@@ -1,103 +1,158 @@
 extends Node
 class_name GameManager
 
-# Lista de palavras que a criança precisará formar, em ordem!
-@export var levels : Array[Array] = [
-	["BO", "NE", "CA"],
-	["DA", "DO"],
-	["SA", "PO"],
-	["CA", "SA"] # Quarta palavra para a 4ª peça do robô!
-]
+# -------------------------------------------------------
+# Referências para nós da cena
+# -------------------------------------------------------
+@onready var imagem_palavra : TextureRect = $ImagemPalavra
 
-# Banco de sílabas aleatórias para confundir a criança
-var distraction_syllables : Array[String] = ["TE", "LA", "MI", "VU", "RU", "PA", "JO", "GE", "FI", "CO"]
-
+# -------------------------------------------------------
+# Estado Interno
+# -------------------------------------------------------
 var current_level_index : int = 0
 var target_word : Array = []
+var _ready_to_play : bool = false
+var _game_over : bool = false
+
+# Número de rodadas = número de peças do robô na cena
+var _total_rounds : int = 0
 
 func _ready():
 	add_to_group("game_manager")
-	# Começa o primeiro nível!
-	load_level(current_level_index)
-
-func load_level(level_index : int):
-	if level_index >= levels.size():
-		print("VOCÊ VENCEU O JOGO INTEIRO!")
-		return
-		
-	target_word = levels[level_index]
-	print("Carregando palavra: ", target_word)
 	
-	# 1. Configura a quantidade visível de "Buracos" (DropZones)
+	# Conecta ao sinal do RobotManager para saber quando o robô completou
+	var robot_m = get_tree().get_first_node_in_group("robot_manager")
+	if robot_m:
+		robot_m.robot_complete.connect(_on_robot_complete)
+		_total_rounds = robot_m.parts_container.get_child_count()
+		print("🤖 Total de peças do robô: ", _total_rounds, " → Total de rodadas.")
+	
+	# Aguarda os dados da API
+	if Global.array_palavras.size() > 0:
+		_on_dados_prontos()
+	else:
+		Global.dados_prontos.connect(_on_dados_prontos)
+		print("⏳ Aguardando dados da API...")
+
+func _on_dados_prontos():
+	print("▶️ Dados recebidos! Total de palavras: ", Global.array_palavras.size())
+	_ready_to_play = true
+	Global.embaralhar()
+	load_level(0)
+
+# -------------------------------------------------------
+# Extrai apenas as letras de um complemento com underscores
+# Ex: "_ _TO" → "TO" | "_MA" → "MA"
+# -------------------------------------------------------
+func _parse_complemento(raw : String) -> String:
+	var result = ""
+	for c in raw:
+		if c != "_" and c != " ":
+			result += c
+	return result
+
+# -------------------------------------------------------
+# Carrega um nível a partir dos dados do Global
+# -------------------------------------------------------
+func load_level(level_index : int):
+	if _game_over:
+		return
+	
+	current_level_index = level_index
+	
+	# Para após o número de rodadas igual às peças do robô
+	if level_index >= _total_rounds or level_index >= Global.array_palavras.size():
+		print("🏆 Todas as rodadas concluídas! Aguardando dança do robô...")
+		return
+	
+	var entry = Global.array_palavras[level_index]
+	
+	# Limpa e extrai as sílabas da nova estrutura da API
+	target_word.clear()
+	for s_dict in entry.silabas:
+		var silaba_limpa = _parse_complemento(s_dict.silaba)
+		target_word.append(silaba_limpa)
+		
+	print("📖 Palavra: ", entry.palavra, " → sílabas: ", target_word)
+	
+	# --- Atualiza imagem de associação ---
+	if imagem_palavra and entry.imagens.size() > 0:
+		imagem_palavra.texture = entry.imagens[0]
+	
+	# --- Configura DropZones visíveis ---
 	var drop_zones = get_tree().get_nodes_in_group("drop_zones")
 	for zone in drop_zones:
-		# Se a palavra for 'DADO' (tamanho 2), esconde a zona Roxa (index 2)
 		if zone.zone_index < target_word.size():
 			zone.show()
 		else:
 			zone.hide()
-			
-	# 2. Prepara o conjunto de Sílabas que vão para a mesa (Certas + Erradas)
-	var syllables_for_this_round = []
-	syllables_for_this_round.append_array(target_word) # Adiciona as certas
 	
-	# Adiciona 2 distrações aleatórias
-	distraction_syllables.shuffle()
-	syllables_for_this_round.append(distraction_syllables[0])
-	syllables_for_this_round.append(distraction_syllables[1])
+	# --- Monta sílabas: certas + distrações ---
+	var syllables_for_round : Array = []
+	syllables_for_round.append_array(target_word)
 	
-	# Embaralha todas juntas para a criança ter que procurar
-	syllables_for_this_round.shuffle()
+	# Pega sílabas de distração de outros itens
+	var distraction_pool : Array = []
+	for i in range(Global.array_palavras.size()):
+		if i == level_index:
+			continue
+		for s_dict in Global.array_palavras[i].silabas:
+			var silaba_limpa = _parse_complemento(s_dict.silaba)
+			if silaba_limpa.length() > 0:
+				distraction_pool.append(silaba_limpa)
 	
-	# 3. Atualiza os bloquinhos arrastáveis na tela
-	# Nota: Precisamos ter pelo menos 5 instâncias de Syllable.tscn criadas na cena!
+	distraction_pool.shuffle()
+	for i in range(min(2, distraction_pool.size())):
+		syllables_for_round.append(distraction_pool[i])
+	
+	syllables_for_round.shuffle()
+	
+	# --- Distribui para os arrastáveis ---
 	var draggables = get_tree().get_nodes_in_group("draggables")
-	
-	# Passa por todas as sílabas que temos na cena
 	for i in range(draggables.size()):
 		var draggable = draggables[i]
-		if i < syllables_for_this_round.size():
-			# Pega uma sílaba embaralhada
+		if i < syllables_for_round.size():
 			draggable.show()
-			draggable.global_position = draggable.original_position # Garante que volte pra prateleira
-			draggable.syllable_text = syllables_for_this_round[i]
-			# Atualiza o Label visualmente
+			draggable.global_position = draggable.original_position
+			draggable.syllable_text = syllables_for_round[i]
 			if draggable.has_node("Label"):
-				draggable.get_node("Label").text = syllables_for_this_round[i]
+				draggable.get_node("Label").text = syllables_for_round[i]
 		else:
-			# Esconde sílabas que sobrarem da cena
 			draggable.hide()
 
+# -------------------------------------------------------
+# Verifica se a palavra foi formada corretamente
+# -------------------------------------------------------
 func check_word():
+	if not _ready_to_play or _game_over:
+		return
+		
 	var drop_zones = get_tree().get_nodes_in_group("drop_zones")
 	if drop_zones.size() == 0:
 		return
-		
+
 	var word_formed = true
-	
+
 	for zone in drop_zones:
-		# Ignora zonas que estão escondidas pra essa palavra menor
 		if not zone.visible:
 			continue
-			
-		var expected_syllable = ""
-		if zone.zone_index < target_word.size():
-			expected_syllable = target_word[zone.zone_index]
-		
-		# Verifica preenchimento correto
 		if not zone.is_occupied or zone.current_syllable == null:
 			word_formed = false
 			break
-			
-		if zone.current_syllable.syllable_text != expected_syllable:
+		var expected = target_word[zone.zone_index] if zone.zone_index < target_word.size() else ""
+		if zone.current_syllable.syllable_text != expected:
 			word_formed = false
 			break
-			
+
 	if word_formed:
 		_on_word_completed()
 
+# -------------------------------------------------------
+# Trata a vitória da rodada
+# -------------------------------------------------------
 func _on_word_completed():
-	print("PARABÉNS! Palavra ", target_word, " formada corretamente!")
+	print("🎉 PARABÉNS! Palavra '", target_word, "' formada corretamente!")
+	_ready_to_play = false # Pausa novos check_word durante animação
 	
 	for node in get_tree().get_nodes_in_group("draggables"):
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -105,16 +160,31 @@ func _on_word_completed():
 	var robot_m = get_tree().get_first_node_in_group("robot_manager")
 	if robot_m:
 		robot_m.animate_new_part()
-		
+	
 	await get_tree().create_timer(2.0).timeout
 	
 	for drop_zone in get_tree().get_nodes_in_group("drop_zones"):
 		drop_zone.clear_zone()
-		
+	
 	for node in get_tree().get_nodes_in_group("draggables"):
-		node.mouse_filter = Control.MOUSE_FILTER_IGNORE # Vamos usar PASS no _ready da sílaba mas tem que resetar aqui depois do clear
 		node.mouse_filter = Control.MOUSE_FILTER_PASS
-		
-	# Avança para a próxima palavra
-	current_level_index += 1
-	load_level(current_level_index)
+	
+	# Só avança se ainda houver rodadas (robô incompleto)
+	if not _game_over:
+		_ready_to_play = true
+		load_level(current_level_index + 1)
+
+# -------------------------------------------------------
+# Chamado pelo RobotManager quando o robô está 100% completo
+# -------------------------------------------------------
+func _on_robot_complete():
+	_game_over = true
+	_ready_to_play = false
+	print("🏆 JOGO COMPLETO! Robô montado e dançando!")
+	
+	# Congela tudo
+	for node in get_tree().get_nodes_in_group("draggables"):
+		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	
+	# Aqui você pode trocar para uma tela de vitória futuramente:
+	# get_tree().change_scene_to_file("res://VictoryScreen.tscn")

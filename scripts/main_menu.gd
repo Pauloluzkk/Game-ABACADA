@@ -10,8 +10,10 @@ func _ready():
 	# Muda o cursor do mouse para a "mãozinha" quando passar por cima do botão
 	play_button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	
-	# Conecta o sinal de botão pressionado
-	play_button.pressed.connect(_on_play_button_pressed)
+	# A conexão do sinal pressed já deve estar feita via editor, não precisa reconectar
+	if not play_button.pressed.is_connected(_on_play_button_pressed):
+		play_button.pressed.connect(_on_play_button_pressed)
+
 
 func _on_play_button_pressed():
 	print("Botão Invisível 'Jogar' pressionado!")
