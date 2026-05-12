@@ -6,6 +6,10 @@ class_name GameManager
 # -------------------------------------------------------
 @onready var imagem_palavra : TextureRect = $ImagemPalavra
 
+# --- Áudio ---
+var word_audio_player : AudioStreamPlayer = AudioStreamPlayer.new()
+
+
 # -------------------------------------------------------
 # Estado Interno
 # -------------------------------------------------------
@@ -19,6 +23,8 @@ var _total_rounds : int = 0
 
 func _ready():
 	add_to_group("game_manager")
+	add_child(word_audio_player)
+
 	
 	# Conecta ao sinal do RobotManager para saber quando o robô completou
 	var robot_m = get_tree().get_first_node_in_group("robot_manager")
@@ -87,9 +93,11 @@ func load_level(level_index : int):
 		else:
 			zone.hide()
 	
-	# --- Monta sílabas: certas + distrações ---
+	# --- Monta sílabas: certas + distrações (agora guardando o texto E o som) ---
 	var syllables_for_round : Array = []
-	syllables_for_round.append_array(target_word)
+	for s_dict in entry.silabas:
+		var silaba_limpa = _parse_complemento(s_dict.silaba)
+		syllables_for_round.append({"text": silaba_limpa, "som": s_dict.som})
 	
 	# Pega sílabas de distração de outros itens
 	var distraction_pool : Array = []
@@ -99,7 +107,7 @@ func load_level(level_index : int):
 		for s_dict in Global.array_palavras[i].silabas:
 			var silaba_limpa = _parse_complemento(s_dict.silaba)
 			if silaba_limpa.length() > 0:
-				distraction_pool.append(silaba_limpa)
+				distraction_pool.append({"text": silaba_limpa, "som": s_dict.som})
 	
 	distraction_pool.shuffle()
 	for i in range(min(2, distraction_pool.size())):
@@ -114,9 +122,8 @@ func load_level(level_index : int):
 		if i < syllables_for_round.size():
 			draggable.show()
 			draggable.global_position = draggable.original_position
-			draggable.syllable_text = syllables_for_round[i]
-			if draggable.has_node("Label"):
-				draggable.get_node("Label").text = syllables_for_round[i]
+			var s_data = syllables_for_round[i]
+			draggable.set_syllable_data(s_data.text, s_data.som)
 		else:
 			draggable.hide()
 
@@ -153,6 +160,13 @@ func check_word():
 func _on_word_completed():
 	print("🎉 PARABÉNS! Palavra '", target_word, "' formada corretamente!")
 	_ready_to_play = false # Pausa novos check_word durante animação
+	
+	# Toca o áudio da palavra completa
+	var entry = Global.array_palavras[current_level_index]
+	if entry.som:
+		word_audio_player.stream = entry.som
+		word_audio_player.play()
+
 	
 	for node in get_tree().get_nodes_in_group("draggables"):
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE

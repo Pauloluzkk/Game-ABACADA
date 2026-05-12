@@ -13,6 +13,11 @@ var is_dragging : bool = false
 var drag_offset : Vector2 = Vector2.ZERO
 var current_drop_zone : Node = null # Armazena se estamos sobre uma zona de soltura válida
 
+# --- Áudio ---
+var audio_stream : AudioStream = null
+var audio_player : AudioStreamPlayer = AudioStreamPlayer.new()
+
+
 func _ready():
 	# Configura a posição inicial (na prateleira)
 	original_position = global_position
@@ -28,12 +33,27 @@ func _ready():
 		if child is Control:
 			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+	# Configura o tocador de áudio
+	add_child(audio_player)
+
+# Função para o GameManager injetar os dados da sílaba
+func set_syllable_data(text: String, audio: AudioStream):
+	syllable_text = text
+	if label:
+		label.text = text
+	audio_stream = audio
+
+
 # O Godot chama esta função automaticamente para eventos de Input neste controle
 func _gui_input(event):
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if event.pressed:
-				# INICIA O ARRASTE
+				# INICIA O ARRASTE E TOCA O SOM
+				if audio_stream:
+					audio_player.stream = audio_stream
+					audio_player.play()
+					
 				is_dragging = true
 				
 				# Se a criança pegou a peça de novo e ela estava numa zona de drop, libera a zona
