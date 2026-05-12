@@ -80,17 +80,41 @@ func _handle_drop():
 	# Busca todas as dropzones válidas no jogo
 	var all_drop_zones = get_tree().get_nodes_in_group("drop_zones")
 	var dropped_on_valid_zone = false
+	var is_wrong_match = false
+	
+	var game_manager = get_tree().get_first_node_in_group("game_manager")
 	
 	for zone in all_drop_zones:
-		if _is_over_drop_zone(zone) and not zone.is_occupied:
-			# Registra fisicamente na DropZone matemática
-			current_drop_zone = zone
-			zone.receive_syllable(self)
-			dropped_on_valid_zone = true
-			break # Cola na primeira que detectar
+		if not zone.visible:
+			continue
+			
+		if _is_over_drop_zone(zone):
+			if not zone.is_occupied:
+				var expected_syllable = ""
+				if game_manager and zone.zone_index < game_manager.target_word.size():
+					expected_syllable = game_manager.target_word[zone.zone_index]
+					
+				if syllable_text == expected_syllable:
+					# CORRETO! Encaixa.
+					current_drop_zone = zone
+					zone.receive_syllable(self)
+					dropped_on_valid_zone = true
+				else:
+					# ERRO! Tentou colocar no lugar errado
+					is_wrong_match = true
+					
+					# Feedback visual: pisca vermelho
+					modulate = Color(1, 0.2, 0.2, 1)
+					var tween_color = get_tree().create_tween()
+					tween_color.tween_property(self, "modulate", Color(1, 1, 1, 1), 0.5)
+					
+					if game_manager:
+						game_manager.play_error_sound()
+						
+			break # Pára de checar outras zonas se já caiu em cima de uma
 	
 	if not dropped_on_valid_zone:
-		# Não soltou em nenhuma zona válida (ou tava cheia), volta pra prateleira!
+		# Não soltou em nenhuma zona válida ou errou, volta pra prateleira!
 		current_drop_zone = null
 		var tween = get_tree().create_tween()
 		tween.tween_property(self, "global_position", original_position, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)

@@ -8,6 +8,7 @@ class_name GameManager
 
 # --- Áudio ---
 var word_audio_player : AudioStreamPlayer = AudioStreamPlayer.new()
+var error_audio_player : AudioStreamPlayer = AudioStreamPlayer.new()
 
 
 # -------------------------------------------------------
@@ -24,6 +25,10 @@ var _total_rounds : int = 0
 func _ready():
 	add_to_group("game_manager")
 	add_child(word_audio_player)
+	add_child(error_audio_player)
+	
+	# Cria um som de "beep" padrão para erro (pode ser trocado depois atribuindo um stream real)
+	error_audio_player.stream = AudioStreamGenerator.new()
 
 	
 	# Conecta ao sinal do RobotManager para saber quando o robô completou
@@ -202,3 +207,29 @@ func _on_robot_complete():
 	
 	# Aqui você pode trocar para uma tela de vitória futuramente:
 	# get_tree().change_scene_to_file("res://VictoryScreen.tscn")
+
+# -------------------------------------------------------
+# Toca um som de erro quando a sílaba for colocada incorretamente
+# -------------------------------------------------------
+func play_error_sound():
+	# Conta como erro globalmente
+	Global.erros += 1
+	
+	# Se ainda for o som gerado (Beep), preenche com onda senoidal irritante curta
+	if error_audio_player.stream is AudioStreamGenerator:
+		error_audio_player.play()
+		var playback = error_audio_player.get_stream_playback()
+		var sample_rate = error_audio_player.stream.mix_rate
+		var phase = 0.0
+		var phase_increment = 300.0 / sample_rate # Frequência de 300Hz (grave/erro)
+		var frames_to_fill = int(sample_rate * 0.15) # 0.15 segundos de duração
+		
+		# Certifica de que a API de buffer tem espaço
+		if playback.get_frames_available() > 0:
+			for i in range(min(frames_to_fill, playback.get_frames_available())):
+				var sample = sin(phase * TAU) * 0.3
+				playback.push_frame(Vector2(sample, sample))
+				phase = fmod(phase + phase_increment, 1.0)
+	else:
+		# Se o usuário atribuiu um .ogg ou .mp3 depois
+		error_audio_player.play()

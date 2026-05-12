@@ -46,7 +46,7 @@ theme_override_styles/hover_pressed = SubResource("StyleBoxEmpty_0hol4")
 theme_override_styles/hover_pressed_mirrored = SubResource("StyleBoxEmpty_q6r6c")
 theme_override_styles/disabled_mirrored = SubResource("StyleBoxEmpty_kdubu")
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." unique_id=1747901376]
+[node name="TrilhaSonora" type="AudioStreamPlayer3D" parent="." unique_id=1747901376]
 stream = ExtResource("3_h7a2f")
 autoplay = true
 

@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Global="*uid://cb5mwc407stgs"
 SideMenu="*res://SideMenu.tscn"
+TrilhaSonora="*uid://b6q3rk3r6x3rj"
 
 [physics]
 
